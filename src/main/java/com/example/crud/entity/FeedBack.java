@@ -26,17 +26,23 @@ public class FeedBack implements Serializable {
     private String datePost;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public FeedBack() {
     }
 
-    public FeedBack(String content, int star, Order order, String datePost) {
+    public FeedBack(String content, int star, Product product, String datePost, User user) {
         this.content = content;
         this.star= star;
-        this.order = order;
+        this.product = product;
         this.datePost= datePost;
+        this.user= user;
     }
 
     public int getStar() {
@@ -63,19 +69,27 @@ public class FeedBack implements Serializable {
         this.content = content;
     }
 
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
     public String getDatePost() {
         return datePost;
     }
 
     public void setDatePost(String datePost) {
         this.datePost = datePost;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.example.crud.service.VoucherService;
 import org.slf4j.Logger;
@@ -81,6 +82,33 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(orderId).get();
     }
 
+    @Override
+    public List<Order> getListOrderByStatus(String status, long userId) {
+        List<Order> listAll= findAllOrder();
+        List<Order> result= new ArrayList<>();
+        for (Order order: listAll){
+            if (order.getStatus().equals(status) && order.getUser().getUserId()== userId){
+                result.add(order);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<Long> getlistProductBought(long userId){
+        List<Long> productIds= new ArrayList<>();
+        List<Order> orderList= getListOrderByStatus(InputParam.FINISHED, userId);
+        if (orderList== null || orderList.size()==0){
+            return null;
+        }
+        for (Order order: orderList){
+            List<OrderLine> orderLineList= orderLineRepository.getListOrderLineInOrder(order.getOrderId());
+            for (OrderLine orderLine: orderLineList){
+                productIds.add(orderLine.getProduct().getId());
+            }
+        }
+        return productIds.stream().distinct().collect(Collectors.toList());
+    }
     @Override
     public List<Order> getListOrderByUserId(long userId) {
         return orderRepository.getListOrderByUserId(userId);

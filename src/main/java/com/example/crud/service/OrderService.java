@@ -14,6 +14,8 @@ public interface OrderService {
     List<Order> findAllOrder();
     Order findById(Long orderId);
     Order getOrder(Long orderId);
+    List<Order> getListOrderByStatus(String status, long userId);
+    List<Long> getlistProductBought(long userId);
     List<Order> getListOrderByUserId(long userId);
     void save (Order order);
     void remove (Order order);

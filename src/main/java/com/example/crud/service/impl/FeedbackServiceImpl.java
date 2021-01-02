@@ -8,10 +8,7 @@ import com.example.crud.service.FeedbackService;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -72,6 +69,20 @@ public class FeedbackServiceImpl implements FeedbackService {
         predicate= checkStar;
         List<FeedBack> totalFeedback= findAll();
         List<FeedBack> result= filterFeedback(totalFeedback, predicate);
+        return result;
+    }
+
+    @Override
+    public List<FeedBack> getFeedbackByProduct(long productId) {
+        List<FeedBack> listAll= findAll();
+        List<FeedBack> result= new ArrayList<>();
+        if (listAll!= null && listAll.size()>0){
+            for (FeedBack feedBack: listAll){
+                if (feedBack.getProduct().getId()== productId){
+                    result.add(feedBack);
+                }
+            }
+        }
         return result;
     }
 

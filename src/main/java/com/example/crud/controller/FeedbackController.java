@@ -2,6 +2,7 @@ package com.example.crud.controller;
 
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.*;
+import com.example.crud.helper.TimeHelper;
 import com.example.crud.predicate.PredicateFeedback;
 import com.example.crud.service.*;
 import org.springframework.http.HttpStatus;
@@ -16,15 +17,12 @@ import java.util.Map;
 @RestController
 public class FeedbackController {
 
-    private UserService userService;
     private OrderService orderService;
-    private ProductService productService;
     private JwtService jwtService;
     private FeedbackService feedbackService;
 
-    public FeedbackController(JwtService jwtService, UserService userService, OrderService orderService, ProductService productService) {
-        this.userService = userService;
-        this.productService = productService;
+    public FeedbackController(JwtService jwtService, OrderService orderService, FeedbackService feedbackService) {
+        this.feedbackService= feedbackService;
         this.orderService = orderService;
         this.jwtService = jwtService;
     }
@@ -32,18 +30,19 @@ public class FeedbackController {
     @PostMapping(value = "/userPage/feedbacks")
     public ResponseEntity<FeedBack> createFeedback(@RequestBody FeedBack feedBack, HttpServletRequest request) {
         if (jwtService.isCustomer(request)) {
-            try {
-                long userId = jwtService.getCurrentUser(request).getUserId();
-                //check validator + permission
-                Order order = orderService.findById(feedBack.getOrder().getOrderId());
-                if (feedBack.getOrder().getUser().getUserId() != userId || !feedBack.getOrder().getStatus().equals(InputParam.FINISHED)) {
-                    return new ResponseEntity("Not permit", HttpStatus.METHOD_NOT_ALLOWED);
-                }
-                feedbackService.save(feedBack);
-                return new ResponseEntity<>(HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            long userId = jwtService.getCurrentUser(request).getUserId();
+            //check validator + permission
+            Product product = feedBack.getProduct();
+            if (product == null) {
+                return new ResponseEntity("Sán phẩm không tồn tại!", HttpStatus.BAD_REQUEST);
             }
+            List<Long> getlistProductBought = orderService.getlistProductBought(userId);
+            if (!getlistProductBought.contains(product.getId())) {
+                return new ResponseEntity("Bạn chưa mua sản phẩm này!", HttpStatus.BAD_REQUEST);
+            }
+            feedBack.setDatePost(TimeHelper.getInstance().getNow());
+            feedbackService.save(feedBack);
+            return new ResponseEntity<>(feedBack, HttpStatus.OK);
         }
         return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
 
@@ -55,14 +54,11 @@ public class FeedbackController {
         if (jwtService.isCustomer(request)) {
             try {
                 long userId = jwtService.getCurrentUser(request).getUserId();
-                //check validator + permission
-                Order order = orderService.findById(feedBack.getOrder().getOrderId());
-                if (feedBack.getOrder().getUser().getUserId() != userId || !feedBack.getOrder().getStatus().equals(InputParam.FINISHED)) {
-                    return new ResponseEntity("Not permit", HttpStatus.METHOD_NOT_ALLOWED);
+                FeedBack currentFeedBack = feedbackService.getFeedback(feedbackId);
+                if (currentFeedBack.getUser().getUserId() != userId || feedbackId != feedBack.getFeedbackId()) {
+                    return new ResponseEntity("Bạn không thể sửa đánh giá này", HttpStatus.METHOD_NOT_ALLOWED);
                 }
-                if(feedbackId!= feedBack.getFeedbackId()){
-                    return new ResponseEntity("Check your input", HttpStatus.BAD_REQUEST);
-                }
+                feedbackService.save(feedBack);
                 feedbackService.updateFeedback(feedBack);
                 return new ResponseEntity<>(HttpStatus.OK);
             } catch (Exception e) {
@@ -73,21 +69,17 @@ public class FeedbackController {
         return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @DeleteMapping(value = "/userPage/feedback")
-    public ResponseEntity<FeedBack> deleteFeedback(@RequestBody FeedBack feedBack, HttpServletRequest request) {
+    @DeleteMapping(value = "/userPage/feedback/{feedback-id}")
+    public ResponseEntity<FeedBack> deleteFeedback(@PathVariable(name = "feedback-id") long feebackId,
+                                                   HttpServletRequest request) {
         if (jwtService.isCustomer(request)) {
-            try {
-                long userId = jwtService.getCurrentUser(request).getUserId();
-                //check validator + permission
-                Order order = orderService.findById(feedBack.getOrder().getOrderId());
-                if (feedBack.getOrder().getUser().getUserId() != userId || !feedBack.getOrder().getStatus().equals(InputParam.FINISHED)) {
-                    return new ResponseEntity("Not permit", HttpStatus.METHOD_NOT_ALLOWED);
-                }
-                feedbackService.deleteFeedback(feedBack);
-                return new ResponseEntity<>(HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            long userId = jwtService.getCurrentUser(request).getUserId();
+            FeedBack feedBack = feedbackService.getFeedback(feebackId);
+            if (feedBack.getUser().getUserId() != userId) {
+                return new ResponseEntity("Bạn không thể xóa đánh giá của người khác", HttpStatus.METHOD_NOT_ALLOWED);
             }
+            feedbackService.deleteFeedback(feedBack);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
 
         return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
@@ -96,44 +88,25 @@ public class FeedbackController {
     //____________________________________ADMIN______________________________________
 
 
-    @GetMapping(value = "/feedbacks")
+    @GetMapping(value = "/feedbacks/{product-id}")
     public ResponseEntity<FeedBack> getListFeedBack(@RequestParam(required = false, defaultValue = "10") int limit,
-                                                    @RequestParam(required = false, defaultValue = "1") int page){
+                                                    @RequestParam(required = false, defaultValue = "1") int page,
+                                                    @PathVariable(name = "product-id") long productId) {
         try {
-            List<FeedBack> feedBacks= feedbackService.findAll();
-            feedBacks= feedbackService.sortByDatePost(feedBacks);
-            Map<String, Object> result= new HashMap<>();
+            List<FeedBack> feedBacks = feedbackService.getFeedbackByProduct(productId);
+            feedBacks = feedbackService.sortByDatePost(feedBacks);
+            Map<String, Object> result = new HashMap<>();
             result.put(InputParam.DATA, feedBacks);
-            Map<String, Object> paging= new HashMap<>();
+            Map<String, Object> paging = new HashMap<>();
             paging.put(InputParam.TOTAL_PAGE, 3);
             paging.put(InputParam.TOTAL_COUNT, feedBacks.size());
             paging.put(InputParam.RECORD_IN_PAGE, limit);
             paging.put(InputParam.CURRENT_PAGE, page);
             result.put(InputParam.PAGING, paging);
             return new ResponseEntity(result, HttpStatus.OK);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping(value = "/adminPage/feedback")
-    public ResponseEntity<FeedBack> deleteFeedbackByAdmin(@RequestBody FeedBack feedBack, HttpServletRequest request) {
-        if (jwtService.isCustomer(request)) {
-            try {
-                long userId = jwtService.getCurrentUser(request).getUserId();
-                //check validator + permission
-                Order order = orderService.findById(feedBack.getOrder().getOrderId());
-                if (feedBack.getOrder().getUser().getUserId() != userId || !feedBack.getOrder().getStatus().equals(InputParam.FINISHED)) {
-                    return new ResponseEntity("Not permit", HttpStatus.METHOD_NOT_ALLOWED);
-                }
-                feedbackService.deleteFeedback(feedBack);
-                return new ResponseEntity<>(HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        }
-
-        return new ResponseEntity("Bạn không phải admin", HttpStatus.METHOD_NOT_ALLOWED);
-    }
 }

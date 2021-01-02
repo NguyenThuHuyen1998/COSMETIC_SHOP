@@ -15,5 +15,6 @@ public interface FeedbackService {
     void deleteFeedback(FeedBack feedback);
     List<FeedBack> sortByDatePost(List<FeedBack> feedBacks);
     List<FeedBack> getFeedbackByStar(int star);
+    List<FeedBack> getFeedbackByProduct(long productId);
 }
 

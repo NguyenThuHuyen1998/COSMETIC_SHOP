@@ -241,7 +241,7 @@ public class OrderController {
             try{
                 Order order= orderService.findById(orderId);
                 User user= order.getUser();
-                if(userId != user.getUserId() || order.getStatus()!= InputParam.SHIPPING){
+                if(userId != user.getUserId() || !order.getStatus().equals(InputParam.SHIPPING) ){
                     return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
                 }
                 order.setStatus(InputParam.FINISHED);
@@ -335,7 +335,7 @@ public class OrderController {
         if(jwtService.isAdmin(request)){
             try{
                 Order order= orderService.findById(orderId);
-                if(order.getStatus()== InputParam.PROCESSING){
+                if(order.getStatus().equals(InputParam.PROCESSING)){
                     User user= order.getUser();
                     if(user == null){
                         logger.error("Người dùng không tồn tại");
@@ -346,7 +346,7 @@ public class OrderController {
 
                     // send email notification
                     Calendar calendar= Calendar.getInstance();
-                    calendar.add(Calendar.DAY_OF_YEAR, 1);
+                    calendar.add(Calendar.DAY_OF_YEAR, 7);
                     Date date1= calendar.getTime();
                     String dateStr= new SimpleDateFormat("dd/MM/yyyy").format(date1);
                     String message= "Đơn hàng có mã "+ order.getOrderId()+ " của bạn đã được giao cho shipper. Đơn sẽ được giao muộn nhất vào ngày " + dateStr+". Hãy để ý điện thoại.";
