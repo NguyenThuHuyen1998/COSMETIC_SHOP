@@ -224,6 +224,30 @@ public class OrderServiceImpl implements OrderService {
         return orderResponse;
     }
 
+    @Override
+    public Map<Long, Integer> getListProductBestSeller() throws ParseException {
+        String dateStart= TimeHelper.getInstance().getFirstInMonth();
+        String dateEnd= TimeHelper.getInstance().getLastDayInMonth();
+        Predicate<Order> predicate= null;
+        PredicateOrderFilter orderFilter = PredicateOrderFilter.getInstance();
+        Predicate<Order> checkDateOrder = orderFilter.checkDate(dateStart, dateEnd);
+        predicate = checkDateOrder;
+        PredicateOrderFilter predicateOrderFilter = PredicateOrderFilter.getInstance();
+        List<Order> orderList = predicateOrderFilter.filterOrder(findAllOrder(), predicate);
+        Map<Long, Integer> reportProduct= new HashMap<>();
+        for (Order order: orderList){
+            List<OrderLine> orderLines= orderLineRepository.getListOrderLineInOrder(order.getOrderId());
+            for (OrderLine orderLine: orderLines){
+                long productId= orderLine.getProduct().getId();
+                if (reportProduct.containsKey(orderLine.getProduct().getId())) {
+                    int quantity= reportProduct.get(productId);
+                    reportProduct.put(productId, quantity+ orderLine.getAmount());
+                }
+                else reportProduct.put(productId, orderLine.getAmount());
+            }
+        }
+        return reportProduct;
+    }
 
 
     public void applyVoucher(Order order, Voucher voucher) {
@@ -254,6 +278,8 @@ public class OrderServiceImpl implements OrderService {
         }
         return orders;
     }
+
+
 
     public static void main(String[] args) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");

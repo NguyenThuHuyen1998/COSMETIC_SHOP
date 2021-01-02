@@ -29,22 +29,9 @@ public class NewsController {
     }
 
     @GetMapping(value = "/news")
-    public ResponseEntity<News> getAllNews(@RequestParam(name = "limit") int limit,
-                                           @RequestParam(name = "page") int page){
+    public ResponseEntity<News> getAllNews(){
         List<News> listNews= newsService.getListNews();
-        Map<String, Object> result= new HashMap<>();
-        int totalPage = (listNews.size()) / limit + ((listNews.size() % limit == 0) ? 0 : 1);
-        int total_count=listNews.size();
-        int recordInPage=limit;
-        int currentPage=page;
-        Map<String, Object> paging= new HashMap<>();
-        paging.put(InputParam.RECORD_IN_PAGE, recordInPage);
-        paging.put(InputParam.TOTAL_COUNT, total_count);
-        paging.put(InputParam.CURRENT_PAGE, currentPage);
-        paging.put(InputParam.TOTAL_PAGE, totalPage);
-        result.put(InputParam.PAGING, paging);
-        result.put(InputParam.DATA, listNews);
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity(listNews, HttpStatus.OK);
     }
 
     @PostMapping(value = "/news")

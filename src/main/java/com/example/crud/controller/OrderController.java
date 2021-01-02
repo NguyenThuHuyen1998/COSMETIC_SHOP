@@ -137,8 +137,6 @@ public class OrderController {
                                                       @RequestParam(name = "priceMin", required = false, defaultValue = "-1") double priceMin,
                                                       @RequestParam(name = "priceMax", required = false, defaultValue = "-1") double priceMax,
                                                       @RequestParam(name = "sortBy", required = false, defaultValue = InputParam.DECREASE) String sortBy,
-                                                      @RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
-                                                      @RequestParam(name = "page", required = false, defaultValue = "1") int page,
                                                       HttpServletRequest request) throws ParseException {
         if(jwtService.isCustomer(request)){
 
@@ -155,7 +153,6 @@ public class OrderController {
             List<Order> orderFilter = orderService.filterOrder(filter);
             List<Order> orderTotal= orderService.getListOrderByUserId(userId);
             List<OrderResponse> orderResponses = new ArrayList<>();
-            Map<String, Object> result= new HashMap<>();
 
             if (orderFilter != null && orderFilter.size() > 0) {
                 for (Order order : orderFilter) {
@@ -164,18 +161,10 @@ public class OrderController {
                     OrderResponse orderResponse = new OrderResponse(order, orderLineForms);
                     orderResponses.add(orderResponse);
                 }
-                result.put(InputParam.DATA, orderResponses);
 
             }
-            Map<String, Object> paging= new HashMap<>();
-            int totalPage = (orderTotal.size()) / limit + ((orderTotal.size() % limit == 0) ? 0 : 1);
-            int totalCount=orderFilter.size();
-            paging.put(InputParam.RECORD_IN_PAGE, limit);
-            paging.put(InputParam.TOTAL_COUNT, totalCount);
-            paging.put(InputParam.CURRENT_PAGE, page);
-            paging.put(InputParam.TOTAL_PAGE, totalPage);
-            result.put(InputParam.PAGING, paging);
-            return new ResponseEntity(result, HttpStatus.OK);
+
+            return new ResponseEntity(orderResponses, HttpStatus.OK);
         }
         return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
     }
@@ -242,10 +231,11 @@ public class OrderController {
                 Order order= orderService.findById(orderId);
                 User user= order.getUser();
                 if(userId != user.getUserId() || !order.getStatus().equals(InputParam.SHIPPING) ){
-                    return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
+                    return new ResponseEntity( HttpStatus.METHOD_NOT_ALLOWED);
                 }
                 order.setStatus(InputParam.FINISHED);
                 orderService.save(order);
+                return new ResponseEntity<>(HttpStatus.OK);
             }
             catch (Exception e){
                 logger.error("Order is not exist");

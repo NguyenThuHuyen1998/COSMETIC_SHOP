@@ -3,10 +3,8 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
 import com.example.crud.entity.Product;
-import com.example.crud.service.CategoryService;
-import com.example.crud.service.FilesStorageService;
-import com.example.crud.service.JwtService;
-import com.example.crud.service.ProductService;
+import com.example.crud.service.*;
+import com.google.api.services.drive.Drive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -28,16 +27,27 @@ public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final JwtService jwtService;
+    private final OrderService orderService;
     private FilesStorageService filesStorageService;
 
     @Value("${file.upload-dir}")
     private String fileDir;
 
+//    @Autowired
+//    private Drive googleDrive;
+
+    public static final String userDir= "file:///"+ System.getProperty("user.dir");
+//file:///home/huyenbaby/Downloads/CRUDProduct/uploads/Screenshot%20from%202020-12-29%2000-26-46.png
     @Autowired
-    public ProductController(ProductService productService, CategoryService categoryService, JwtService jwtService, FilesStorageService filesStorageService) {
+    public ProductController(ProductService productService,
+                             CategoryService categoryService,
+                             JwtService jwtService,
+                             OrderService orderService,
+                             FilesStorageService filesStorageService) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.jwtService= jwtService;
+        this.orderService= orderService;
         this.filesStorageService= filesStorageService;
     }
 
@@ -54,9 +64,7 @@ public class ProductController {
                                          @RequestParam(required = false, defaultValue = "-1") double priceMin,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMax,
                                          @RequestParam(required = false, defaultValue = "0") long categoryId,
-                                         @RequestParam(required = false, defaultValue = "") String sortBy,
-                                         @RequestParam(required = false, defaultValue = "9") int limit,
-                                         @RequestParam(required = false, defaultValue = "1") int page) throws ParseException {
+                                         @RequestParam(required = false, defaultValue = "") String sortBy) throws ParseException {
             Map<String, Object> input = new HashMap<>();
             input.put(InputParam.KEY_WORD, keyword);
             input.put(InputParam.PRICE_MAX, priceMax);
@@ -64,24 +72,35 @@ public class ProductController {
             input.put(InputParam.CATEGORY_ID, categoryId);
             input.put(InputParam.SORT_BY, sortBy);
             List<Product> output = productService.filterProduct(input);
-
-            List<Product> totalProduct= productService.findAllProduct();
-            int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
-            int total_count=output.size();
-            Map<String, Object> paging= new HashMap<>();
-            paging.put(InputParam.RECORD_IN_PAGE, limit);
-            paging.put(InputParam.TOTAL_COUNT, total_count);
-            paging.put(InputParam.CURRENT_PAGE, page);
-            paging.put(InputParam.TOTAL_PAGE, totalPage);
-            Map<String, Object> result= new HashMap<>();
-            result.put(InputParam.PAGING, paging);
-            result.put(InputParam.DATA, output);
-            return new ResponseEntity(result, HttpStatus.OK);
+            return new ResponseEntity(output, HttpStatus.OK);
     }
 
     @GetMapping(value = "/products/bestSeller")
-    public ResponseEntity<Product> getListProductBestSeller(){
-        return null;
+    public ResponseEntity<Product> getListProductBestSeller(@RequestParam(required = false, defaultValue = "5") int limit) throws ParseException {
+        Map<Long, Integer> result= orderService.getListProductBestSeller();
+        Set<Map.Entry<Long, Integer>> entries= result.entrySet();
+        Comparator<Map.Entry<Long, Integer>> comparator = new Comparator<Map.Entry<Long, Integer>>() {
+            @Override
+            public int compare(Map.Entry<Long, Integer> e1, Map.Entry<Long, Integer> e2) {
+                Integer v1 = e1.getValue();
+                Integer v2 = e2.getValue();
+                return v2.compareTo(v1);
+            }
+        };
+        List<Map.Entry<Long, Integer>> listEntries = new ArrayList(entries);
+        Collections.sort(listEntries, comparator);
+        LinkedHashMap<Long, Integer> sortedMap = new LinkedHashMap<>(listEntries.size());
+        for (Map.Entry<Long, Integer> entry : listEntries) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        System.out.println("----- After sorting by values -----");
+        Set<Map.Entry<Long, Integer>> sortedEntries = sortedMap.entrySet();
+        List<Long> listProduct= new ArrayList<>();
+        for (Map.Entry<Long, Integer> mapping : sortedEntries) {
+            listProduct.add(mapping.getKey());
+        }
+        return new ResponseEntity(listProduct, HttpStatus.OK);
     }
 
     // xem chi tiết 1 sản phẩm
@@ -132,7 +151,6 @@ public class ProductController {
                 String url= fileDir+ file.getOriginalFilename();
                 System.out.println(url);
                 Path path = Paths.get(url);
-                String passedPath = file.getOriginalFilename();
                 Path resolvedPath
                         = path.resolve(url);
                 System.out.println(resolvedPath.toString());
@@ -213,4 +231,16 @@ public class ProductController {
         }
         return new ResponseEntity("Bạn không phải là admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
+
+//    @GetMapping(value = "test")
+//    public ResponseEntity<String> test(@RequestParam(value = "file") MultipartFile file){
+//        filesStorageService.save(file);
+//        String url= fileDir+ file.getOriginalFilename();
+//        System.out.println(System.getProperty("user.dir"));
+//    }
+
+    public static void main(String[] args) {
+        System.out.println(System.getProperty("user.dir"));
+    }
 }
+

@@ -1,7 +1,5 @@
 package com.example.crud.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 

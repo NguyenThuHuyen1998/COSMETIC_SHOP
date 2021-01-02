@@ -65,7 +65,10 @@ public class TimeHelper {
     public String getFirstInMonth(){
         int month= calendar.get(Calendar.MONTH)+1;
         int year= calendar.get(Calendar.YEAR);
-        return "01/"+ String.valueOf(month)+"/"+String.valueOf(year);
+        if(month<10){
+            return "01"+"/0"+String.valueOf(month)+ "/"+ String.valueOf(calendar.get(Calendar.YEAR));
+        }
+        return "01/"+ String.valueOf(month)+ "/"+ String.valueOf(calendar.get(Calendar.YEAR));
     }
 
     public String getLastDayInMonth(){

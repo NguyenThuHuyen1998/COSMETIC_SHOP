@@ -23,4 +23,5 @@ public interface OrderService {
     OrderResponse showOrder(User user);
     OrderResponse showOrder(User user, Voucher voucher);
     OrderResponse createOrder(User user, String note, String delivery, Voucher voucher, Address address);
+    Map<Long, Integer> getListProductBestSeller() throws ParseException;
 }

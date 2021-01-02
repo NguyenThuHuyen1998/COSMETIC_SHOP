@@ -250,18 +250,6 @@ public class UserController {
         return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    /* ---------------- không xóa user, chỉ vô hiệu hóa ------------------------ ADMIN*/
-//    @RequestMapping(value = "/adminPage/users/{id}", method = RequestMethod.DELETE)
-//    public ResponseEntity<String> disableUser(@PathVariable("id") long id) {
-//        User user= userService.findById(id);
-//        if(user!= null){
-//            userService.add(user);
-//            return new ResponseEntity<String>("Disable!", HttpStatus.OK);
-//        }
-//        return new ResponseEntity<>("User not exist", HttpStatus.BAD_REQUEST);
-//
-//    }
-
 
     // phân quyền user làm admin
     @PostMapping(value = "/adminPage/decentralization/{id}")

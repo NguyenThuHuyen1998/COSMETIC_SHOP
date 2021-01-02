@@ -88,21 +88,11 @@ public class FeedbackController {
 
 
     @GetMapping(value = "/feedbacks/{product-id}")
-    public ResponseEntity<FeedBack> getListFeedBack(@RequestParam(required = false, defaultValue = "10") int limit,
-                                                    @RequestParam(required = false, defaultValue = "1") int page,
-                                                    @PathVariable(name = "product-id") long productId) {
+    public ResponseEntity<FeedBack> getListFeedBack(@PathVariable(name = "product-id") long productId) {
         try {
             List<FeedBack> feedBacks = feedbackService.getFeedbackByProduct(productId);
             feedBacks = feedbackService.sortByDatePost(feedBacks);
-            Map<String, Object> result = new HashMap<>();
-            result.put(InputParam.DATA, feedBacks);
-            Map<String, Object> paging = new HashMap<>();
-            paging.put(InputParam.TOTAL_PAGE, 3);
-            paging.put(InputParam.TOTAL_COUNT, feedBacks.size());
-            paging.put(InputParam.RECORD_IN_PAGE, limit);
-            paging.put(InputParam.CURRENT_PAGE, page);
-            result.put(InputParam.PAGING, paging);
-            return new ResponseEntity(result, HttpStatus.OK);
+            return new ResponseEntity(feedBacks, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

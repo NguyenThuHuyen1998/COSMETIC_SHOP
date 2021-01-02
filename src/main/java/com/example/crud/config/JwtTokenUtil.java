@@ -67,11 +67,6 @@ public class JwtTokenUtil implements Serializable {
 		return doGenerateToken(claims, userDetails);
 	}
 
-	//while creating the token -
-	//1. Define  claims of the token, like Issuer, Expiration, Subject, and the ID
-	//2. Sign the JWT using the HS512 algorithm and secret key.
-	//3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
-	//   compaction of the JWT to a URL-safe string 
 	private String doGenerateToken(Map<String, Object> claims, UserDetails userDetails) {
 
 		return Jwts.builder().setClaims(claims)

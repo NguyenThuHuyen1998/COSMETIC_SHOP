@@ -44,6 +44,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return super.authenticationManagerBean();
 	}
 
+//	@Override
+//	public void addResourceHandlers(final ResourceHandlerRegistry registry) {
+//		registry.addResourceHandler("/upload/**").addResourceLocations("file:///" + System.getProperty("user.dir") + "/src/main/upload/");
+//	}
 	protected void configure(HttpSecurity http) throws Exception{
 		http
 				.csrf().disable()

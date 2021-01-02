@@ -47,11 +47,9 @@ public class ReportController {
     public ResponseEntity<Order> reportProduct(HttpServletRequest request){
         if(jwtService.isAdmin(request)){
             try{
-                Map<String, Object> report= reportService.getReport();
-                if(report.size()>0){
-                    return new ResponseEntity(report, HttpStatus.OK);
-                }
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                //Map<String, Object> report= reportService.getReport();
+                List<Order> orderList= orderService.findAllOrder();
+                    return new ResponseEntity(orderList, HttpStatus.OK);
             }
             catch (Exception e){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
