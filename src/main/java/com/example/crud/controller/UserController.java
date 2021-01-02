@@ -65,6 +65,7 @@ public class UserController {
         this.jwtHandler = jwtHandler;
         this.sendEmailService= service;
         this.shipService= shipService;
+        this.filesStorageService= filesStorageService;
         this.passwordEncoder = passwordEncoder;
     }
 
