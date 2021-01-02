@@ -1,6 +1,7 @@
 package com.example.crud.service.impl;
 
 import com.example.crud.entity.Order;
+import com.example.crud.entity.User;
 import com.example.crud.entity.UserVoucher;
 import com.example.crud.entity.Voucher;
 import com.example.crud.repository.UserVoucherRepository;
@@ -68,6 +69,16 @@ class VoucherServiceImpl implements VoucherService {
     @Override
     public boolean validateVoucher(Order order, Voucher voucher) {
         double valueApplyVoucher= voucher.getPriceApply();
+        User user= order.getUser();
+        List<UserVoucher> listAll= (List<UserVoucher>) userVoucherRepository.findAll();
+        if (listAll== null || listAll.size()==0){
+            return false;
+        }
+        for (UserVoucher userVoucher: listAll){
+            if (userVoucher.getVoucher().getCouponId()== voucher.getCouponId() && userVoucher.getUserVoucherId()== user.getUserId()){
+                return false;
+            }
+        }
         if(order.getTotal()>= valueApplyVoucher){
             return true;
         }

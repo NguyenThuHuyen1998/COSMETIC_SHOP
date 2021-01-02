@@ -80,7 +80,7 @@ public class JwtAuthenticationController {
             return new ResponseEntity("Email không hợp lệ!", HttpStatus.BAD_REQUEST);
         }
         user.setRole(InputParam.USER);
-        user.setAvatar(fileDir+ "/avatardefault.png");
+        user.setAvatar(fileDir+ "avatardefault.png");
         user.setEnable(true);
         //set lần cuối hoạt động để check sau 3 tháng k hoạt động thì xóa sản phẩm trong giỏ hàng
         user.setLastActive(new Date().getTime());

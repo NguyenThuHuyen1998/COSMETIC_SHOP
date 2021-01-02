@@ -33,6 +33,11 @@ public class UserVoucher implements Serializable {
 
     }
 
+    public UserVoucher(User user, Voucher voucher){
+        this.user= user;
+        this.voucher= voucher;
+    }
+
     public long getUserVoucherId() {
         return userVoucherId;
     }

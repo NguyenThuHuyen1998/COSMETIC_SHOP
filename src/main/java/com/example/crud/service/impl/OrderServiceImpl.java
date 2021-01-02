@@ -232,6 +232,9 @@ public class OrderServiceImpl implements OrderService {
             order.setVoucher(value* order.getTotal()/100);
         }
         else order.setVoucher(value);
+        User user= order.getUser();
+        UserVoucher userVoucher= new UserVoucher(user, voucher);
+        voucherService.addUserVoucher(userVoucher);
     }
 
     public List<Order> sortByDateSell(List<Order> orders, String sortBy) {
