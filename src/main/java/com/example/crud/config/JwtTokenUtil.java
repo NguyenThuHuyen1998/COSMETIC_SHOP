@@ -1,11 +1,16 @@
 package com.example.crud.config;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.example.crud.entity.CustomUserDetails;
+import com.example.crud.entity.User;
+import com.example.crud.service.UserService;
+import com.example.crud.service.impl.UserServiceImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +25,21 @@ public class JwtTokenUtil implements Serializable {
 
 	public static final long JWT_TOKEN_VALIDITY = 5 * 24 * 60 * 60;
 
+	public static final String ROLES_CLAIM_NAME="role_clam_name";
+
 	public static final String SECRET= "huyenngtn";
+
+	public UserService userService;
+
+	public JwtTokenUtil(UserService userService){
+		this.userService= userService;
+	}
 
 	//retrieve username from jwt token
 	public String getUsernameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
 	}
+
 
 	//retrieve expiration date from jwt token
 	public Date getExpirationDateFromToken(String token) {
@@ -50,7 +64,7 @@ public class JwtTokenUtil implements Serializable {
 	//generate token for user
 	public String generateToken(UserDetails userDetails) {
 		Map<String, Object> claims = new HashMap<>();
-		return doGenerateToken(claims, userDetails.getUsername());
+		return doGenerateToken(claims, userDetails);
 	}
 
 	//while creating the token -
@@ -58,9 +72,12 @@ public class JwtTokenUtil implements Serializable {
 	//2. Sign the JWT using the HS512 algorithm and secret key.
 	//3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
 	//   compaction of the JWT to a URL-safe string 
-	private String doGenerateToken(Map<String, Object> claims, String subject) {
+	private String doGenerateToken(Map<String, Object> claims, UserDetails userDetails) {
 
-		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+		return Jwts.builder().setClaims(claims)
+				.setSubject(userDetails.getUsername())
+				.claim("role", userDetails.getAuthorities())
+				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
 				.signWith(SignatureAlgorithm.HS512, SECRET).compact();
 	}

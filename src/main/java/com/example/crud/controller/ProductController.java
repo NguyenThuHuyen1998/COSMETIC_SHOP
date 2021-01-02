@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 
@@ -39,6 +41,10 @@ public class ProductController {
         this.filesStorageService= filesStorageService;
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<String> testUploadFile(@RequestParam("file") MultipartFile file){
+        return null;
+    }
     //lấy danh sách tất cả sản phẩm dành cho user
     // lọc theo category, khoảng giá, search keyword
     @CrossOrigin
@@ -123,7 +129,14 @@ public class ProductController {
                 product.setPrice(price);
                 product.setActive(true);
                 filesStorageService.save(file);
-                product.setImage(fileDir+ file.getOriginalFilename());
+                String url= fileDir+ file.getOriginalFilename();
+                System.out.println(url);
+                Path path = Paths.get(url);
+                String passedPath = file.getOriginalFilename();
+                Path resolvedPath
+                        = path.resolve(url);
+                System.out.println(resolvedPath.toString());
+                product.setImage(resolvedPath.toString());
                 productService.save(product);
             } catch (Exception e) {
                 logger.error(String.valueOf(e));

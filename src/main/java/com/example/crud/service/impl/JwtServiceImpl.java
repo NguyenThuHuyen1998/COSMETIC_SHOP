@@ -18,9 +18,9 @@ import javax.servlet.http.HttpServletRequest;
 @Service
 public class JwtServiceImpl implements JwtService{
     public static final Logger logger = LoggerFactory.getLogger(JwtServiceImpl.class);
-    private JwtTokenUtil jwtTokenUtil= new JwtTokenUtil();
-
     private UserService userService;
+    private JwtTokenUtil jwtTokenUtil= new JwtTokenUtil( userService);
+
 
     @Autowired
     public JwtServiceImpl(UserService userService){
