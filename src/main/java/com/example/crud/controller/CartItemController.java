@@ -99,7 +99,7 @@ public class CartItemController {
                             cart.setTotalMoney(cart.getTotalMoney()- index.getProduct().getPrice()*oldQuantity);
                             cartItemService.deleteCartItem(cartItem);
                         }
-                        return new ResponseEntity<>(HttpStatus.OK);
+                        return new ResponseEntity("Cập nhật giỏ hàng thành công!",HttpStatus.OK);
                     }
                 }
                 cartItemService.save(cartItem);
@@ -146,7 +146,7 @@ public class CartItemController {
         if(jwtService.isCustomer(request)){
             long userId= jwtService.getCurrentUser(request).getUserId();
             cartItemService.deleteAllCartItem(userId);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity("Xóa giỏ hàng thành công!",HttpStatus.OK);
         }
         return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
     }

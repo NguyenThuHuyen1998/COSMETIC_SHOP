@@ -116,7 +116,7 @@ public class CategoryController {
                     return new ResponseEntity("Có sản phẩm thuộc danh mục này, không thể xóa danh mục!", HttpStatus.BAD_REQUEST);
                 }
                 categoryService.remove(currentCategory);
-                return new ResponseEntity(HttpStatus.OK);
+                return new ResponseEntity("Xóa danh mục thành công!",HttpStatus.OK);
 
         }
         return new ResponseEntity("Bạn không phải admin", HttpStatus.METHOD_NOT_ALLOWED);

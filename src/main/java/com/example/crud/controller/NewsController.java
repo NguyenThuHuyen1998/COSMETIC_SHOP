@@ -70,7 +70,7 @@ public class NewsController {
             try{
                 News news= newsService.getNewsById(newsId);
                 newsService.deleteNews(news);
-                return new ResponseEntity<>(HttpStatus.OK);
+                return new ResponseEntity("Xóa bài viết thành công!", HttpStatus.OK);
             }
             catch (Exception e){
                 logger.error(e.getMessage());

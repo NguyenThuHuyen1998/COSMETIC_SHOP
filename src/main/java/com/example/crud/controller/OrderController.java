@@ -187,7 +187,7 @@ public class OrderController {
                 } else {
                     order.setStatus(InputParam.CANCEL);
                     orderService.save(order);
-                    return new ResponseEntity<>(HttpStatus.OK);
+                    return new ResponseEntity("Xóa đơn hàng thành công!",HttpStatus.OK);
                 }
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
@@ -370,7 +370,7 @@ public class OrderController {
 //                    orderLineService.remove(orderLine);
 //                }
                 orderService.remove(order);
-                return new ResponseEntity("Success", HttpStatus.OK);
+                return new ResponseEntity("Xóa đơn hàng thành công!", HttpStatus.OK);
             }
             catch (Exception e){
                 logger.error("Order is not exist");

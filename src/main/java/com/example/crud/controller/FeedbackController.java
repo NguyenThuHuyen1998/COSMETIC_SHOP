@@ -59,7 +59,7 @@ public class FeedbackController {
                 }
                 feedbackService.save(feedBack);
                 feedbackService.updateFeedback(feedBack);
-                return new ResponseEntity<>(HttpStatus.OK);
+                return new ResponseEntity("Cập nhật đánh giá thành công!",HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -78,7 +78,7 @@ public class FeedbackController {
                 return new ResponseEntity("Bạn không thể xóa đánh giá của người khác", HttpStatus.METHOD_NOT_ALLOWED);
             }
             feedbackService.deleteFeedback(feedBack);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity("Xóa đánh giá thành công!",HttpStatus.OK);
         }
 
         return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);

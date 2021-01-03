@@ -71,7 +71,7 @@ public class CartController {
             if(jwtService.isCustomer(request)){
                 long userId= jwtService.getCurrentUser(request).getUserId();
                 cartItemService.deleteAllCartItem(userId);
-                return new ResponseEntity( HttpStatus.OK);
+                return new ResponseEntity("Xóa giỏ hàng thành công!",HttpStatus.OK);
             }
             return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
         }

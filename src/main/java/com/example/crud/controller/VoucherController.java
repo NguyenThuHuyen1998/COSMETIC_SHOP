@@ -66,7 +66,7 @@ public class VoucherController {
             Voucher voucher= voucherService.getVoucherById(voucherId);
             if (voucher!= null){
                 voucherService.deleteVoucher(voucher);
-                return new ResponseEntity<>(HttpStatus.OK);
+                return new ResponseEntity("Xóa mã giảm giá thành công",HttpStatus.OK);
             }
             return new ResponseEntity("Voucher không tồn tại!", HttpStatus.BAD_REQUEST);
         }
@@ -90,7 +90,7 @@ public class VoucherController {
                     return new ResponseEntity("Ngày kết thúc không thể nhỏ hơn ngày bắt đầu!", HttpStatus.BAD_REQUEST);
                 }
                 voucherService.addVoucher(voucher);
-                return new ResponseEntity<>(HttpStatus.OK);
+                return new ResponseEntity("Cập nhật mã giảm giá thành công!", HttpStatus.OK);
             }
             return new ResponseEntity("Voucher không tồn tại!", HttpStatus.BAD_REQUEST);
         }

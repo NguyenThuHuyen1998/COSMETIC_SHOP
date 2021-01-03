@@ -132,8 +132,7 @@ public class Product implements Serializable {
     }
 
     public String getImage() {
-//        return new File(image).getAbsolutePath();
-        return "file:///"+ System.getProperty("user.dir")+ image;
+        return image;
     }
 
     public void setImage(String image) {

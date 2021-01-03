@@ -3,23 +3,26 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
 import com.example.crud.entity.Product;
+import com.example.crud.response.Response;
 import com.example.crud.service.*;
-import com.google.api.services.drive.Drive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class ProductController {
@@ -28,10 +31,14 @@ public class ProductController {
     private final CategoryService categoryService;
     private final JwtService jwtService;
     private final OrderService orderService;
-    private FilesStorageService filesStorageService;
+    private final FilesStorageService filesStorageService;
+//    private FileService fileService;
 
     @Value("${file.upload-dir}")
     private String fileDir;
+
+    @Value(("${server.port}"))
+    private int port;
 
 //    @Autowired
 //    private Drive googleDrive;
@@ -43,13 +50,16 @@ public class ProductController {
                              CategoryService categoryService,
                              JwtService jwtService,
                              OrderService orderService,
-                             FilesStorageService filesStorageService) {
+                             FilesStorageService fileStorageService) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.jwtService= jwtService;
         this.orderService= orderService;
-        this.filesStorageService= filesStorageService;
+        this.filesStorageService= fileStorageService;
     }
+
+    @Autowired
+    public FilesStorageService fileStorageService;
 
     @GetMapping("/test")
     public ResponseEntity<String> testUploadFile(@RequestParam("file") MultipartFile file){
@@ -93,14 +103,16 @@ public class ProductController {
         for (Map.Entry<Long, Integer> entry : listEntries) {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
-
-        System.out.println("----- After sorting by values -----");
         Set<Map.Entry<Long, Integer>> sortedEntries = sortedMap.entrySet();
         List<Long> listProduct= new ArrayList<>();
         for (Map.Entry<Long, Integer> mapping : sortedEntries) {
             listProduct.add(mapping.getKey());
         }
-        return new ResponseEntity(listProduct, HttpStatus.OK);
+        List<Product> productList= new ArrayList<>();
+        for (int i=0; i<limit; i++){
+            productList.add(productService.findById(listProduct.get(i)));
+        }
+        return new ResponseEntity(productList, HttpStatus.OK);
     }
 
     // xem chi tiết 1 sản phẩm
@@ -147,14 +159,13 @@ public class ProductController {
                 product.setPreview(preview);
                 product.setPrice(price);
                 product.setActive(true);
-                filesStorageService.save(file);
-                String url= fileDir+ file.getOriginalFilename();
-                System.out.println(url);
-                Path path = Paths.get(url);
+                String fileName= filesStorageService.save(file);
+                System.out.println(fileDir);
+                Path path = Paths.get(fileDir);
                 Path resolvedPath
-                        = path.resolve(url);
+                        = path.resolve(fileName);
                 System.out.println(resolvedPath.toString());
-                product.setImage(resolvedPath.toString());
+                product.setImage("http://localhost:"+ String.valueOf(port)+resolvedPath);
                 productService.save(product);
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
@@ -199,6 +210,12 @@ public class ProductController {
                 }
                 if(file!= null){
                     filesStorageService.save(file);
+                    String imageName= file.getOriginalFilename();
+                    Path path = Paths.get(fileDir);
+                    Path resolvedPath
+                            = path.resolve(imageName);
+                    System.out.println(resolvedPath.toString());
+                    currentProduct.setImage("http://localhost:"+ String.valueOf(port)+resolvedPath);
                     currentProduct.setImage(fileDir+ file.getOriginalFilename());
                 }
                 productService.save(currentProduct);
@@ -222,7 +239,7 @@ public class ProductController {
                 Product product = productService.findById(productId);
                 product.setActive(false);
                 productService.save(product);
-                return new ResponseEntity("Success", HttpStatus.OK);
+                return new ResponseEntity("Xóa sản phẩm thành công!", HttpStatus.OK);
             }
             catch (Exception e){
                 logger.error(e.getMessage());
@@ -232,14 +249,12 @@ public class ProductController {
         return new ResponseEntity("Bạn không phải là admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-//    @GetMapping(value = "test")
-//    public ResponseEntity<String> test(@RequestParam(value = "file") MultipartFile file){
-//        filesStorageService.save(file);
-//        String url= fileDir+ file.getOriginalFilename();
-//        System.out.println(System.getProperty("user.dir"));
-//    }
-
     public static void main(String[] args) {
+        String url= "http://localhost:8081/uploads/Screenshot%20from%202020-12-24%2000-22-58.png";
+        Path path = Paths.get(url);
+        Path resolvedPath
+                = path.resolve(path);
+        System.out.println(resolvedPath);
         System.out.println(System.getProperty("user.dir"));
     }
 }
