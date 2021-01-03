@@ -3,7 +3,6 @@ package com.example.crud.entity;
 import com.example.crud.response.ProductResponse;
 
 import javax.persistence.*;
-import java.io.File;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
