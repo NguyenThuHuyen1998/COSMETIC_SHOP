@@ -161,7 +161,7 @@ public class ProductController {
                 Path resolvedPath
                         = path.resolve(fileName);
                 System.out.println(resolvedPath.toString());
-                product.setImage("http://localhost:"+ String.valueOf(port)+resolvedPath);
+                product.setImage(resolvedPath.toString());
                 productService.save(product);
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
