@@ -1,0 +1,435 @@
+-- MySQL dump 10.13  Distrib 5.7.32, for Linux (x86_64)
+--
+-- Host: 127.0.0.1    Database: COSMETIC_SHOP
+-- ------------------------------------------------------
+-- Server version	5.7.32-0ubuntu0.18.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `hibernate_sequence`
+--
+
+DROP TABLE IF EXISTS `hibernate_sequence`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hibernate_sequence` (
+  `next_val` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hibernate_sequence`
+--
+
+LOCK TABLES `hibernate_sequence` WRITE;
+/*!40000 ALTER TABLE `hibernate_sequence` DISABLE KEYS */;
+INSERT INTO `hibernate_sequence` VALUES (122);
+/*!40000 ALTER TABLE `hibernate_sequence` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tbl_address`
+--
+
+DROP TABLE IF EXISTS `tbl_address`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tbl_address` (
+  `address_id` bigint(20) NOT NULL,
+  `city` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `delivery` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `district` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `note` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `street` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`address_id`),
+  KEY `FK2s8ssqc5b7xsvbaereac0daj` (`user_id`),
+  CONSTRAINT `FK2s8ssqc5b7xsvbaereac0daj` FOREIGN KEY (`user_id`) REFERENCES `tblusers` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tbl_address`
+--
+
+LOCK TABLES `tbl_address` WRITE;
+/*!40000 ALTER TABLE `tbl_address` DISABLE KEYS */;
+INSERT INTO `tbl_address` VALUES (30,'Hà Nội','J&T','Nam Từ Liem',NULL,'365934509','132 Phùng Khoang',3);
+/*!40000 ALTER TABLE `tbl_address` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tbl_feedback`
+--
+
+DROP TABLE IF EXISTS `tbl_feedback`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tbl_feedback` (
+  `feedback_id` bigint(20) NOT NULL,
+  `content` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `date_post` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `star` int(11) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`feedback_id`),
+  KEY `FKeraommrt51jrh7xt8v07ev6ma` (`user_id`),
+  KEY `FKir8tw33nbhi6vr8uqqbc73oed` (`product_id`),
+  CONSTRAINT `FKeraommrt51jrh7xt8v07ev6ma` FOREIGN KEY (`user_id`) REFERENCES `tblusers` (`user_id`),
+  CONSTRAINT `FKir8tw33nbhi6vr8uqqbc73oed` FOREIGN KEY (`product_id`) REFERENCES `tblproducts` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tbl_feedback`
+--
+
+LOCK TABLES `tbl_feedback` WRITE;
+/*!40000 ALTER TABLE `tbl_feedback` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tbl_feedback` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tbl_user_voucher`
+--
+
+DROP TABLE IF EXISTS `tbl_user_voucher`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tbl_user_voucher` (
+  `user_voucher_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `voucher_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`user_voucher_id`),
+  KEY `FKhyryfpbfd25l908ufgjw8fy8i` (`user_id`),
+  KEY `FKh78bu9u7d2lhcoxmalh3fq8bw` (`voucher_id`),
+  CONSTRAINT `FKh78bu9u7d2lhcoxmalh3fq8bw` FOREIGN KEY (`voucher_id`) REFERENCES `tbl_vouchers` (`voucher_id`),
+  CONSTRAINT `FKhyryfpbfd25l908ufgjw8fy8i` FOREIGN KEY (`user_id`) REFERENCES `tblusers` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tbl_user_voucher`
+--
+
+LOCK TABLES `tbl_user_voucher` WRITE;
+/*!40000 ALTER TABLE `tbl_user_voucher` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tbl_user_voucher` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tbl_vouchers`
+--
+
+DROP TABLE IF EXISTS `tbl_vouchers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tbl_vouchers` (
+  `voucher_id` bigint(20) NOT NULL,
+  `code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_end` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_start` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price_apply` double NOT NULL,
+  `type_discount` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `value_discount` double DEFAULT NULL,
+  PRIMARY KEY (`voucher_id`),
+  UNIQUE KEY `UK_1b0q0qy94klnpwhs70vc8w1js` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tbl_vouchers`
+--
+
+LOCK TABLES `tbl_vouchers` WRITE;
+/*!40000 ALTER TABLE `tbl_vouchers` DISABLE KEYS */;
+INSERT INTO `tbl_vouchers` VALUES (16,'TET2020','01/01/2021','20/12/2020',600000,'VALUE',200000),(41,'TET2021','02/01/2021','31/12/2020',500000,'percent',20);
+/*!40000 ALTER TABLE `tbl_vouchers` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tblcart`
+--
+
+DROP TABLE IF EXISTS `tblcart`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblcart` (
+  `cart_id` bigint(20) NOT NULL,
+  `total_money` double DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`cart_id`),
+  KEY `FKsf9gb2qbi5tylroo1jvf3disq` (`user_id`),
+  CONSTRAINT `FKsf9gb2qbi5tylroo1jvf3disq` FOREIGN KEY (`user_id`) REFERENCES `tblusers` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblcart`
+--
+
+LOCK TABLES `tblcart` WRITE;
+/*!40000 ALTER TABLE `tblcart` DISABLE KEYS */;
+INSERT INTO `tblcart` VALUES (2,0,1),(4,0,3);
+/*!40000 ALTER TABLE `tblcart` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tblcart_items`
+--
+
+DROP TABLE IF EXISTS `tblcart_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblcart_items` (
+  `cart_item_id` bigint(20) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `cart_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`cart_item_id`),
+  KEY `FKlq1ww0ybuv90i00iraicj1ylm` (`cart_id`),
+  KEY `FKph3xbbqkxgggjp48is7mfgbli` (`product_id`),
+  CONSTRAINT `FKlq1ww0ybuv90i00iraicj1ylm` FOREIGN KEY (`cart_id`) REFERENCES `tblcart` (`cart_id`),
+  CONSTRAINT `FKph3xbbqkxgggjp48is7mfgbli` FOREIGN KEY (`product_id`) REFERENCES `tblproducts` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblcart_items`
+--
+
+LOCK TABLES `tblcart_items` WRITE;
+/*!40000 ALTER TABLE `tblcart_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tblcart_items` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tblcategories`
+--
+
+DROP TABLE IF EXISTS `tblcategories`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblcategories` (
+  `cate_id` bigint(20) NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`cate_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblcategories`
+--
+
+LOCK TABLES `tblcategories` WRITE;
+/*!40000 ALTER TABLE `tblcategories` DISABLE KEYS */;
+INSERT INTO `tblcategories` VALUES (5,'mô tả trị mụn','trị mụn'),(71,'mô tả sản phẩm trị sẹo rỗ','trị sẹo rỗ');
+/*!40000 ALTER TABLE `tblcategories` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tblnews`
+--
+
+DROP TABLE IF EXISTS `tblnews`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblnews` (
+  `news_id` bigint(20) NOT NULL,
+  `content` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `date_post` bigint(20) DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `author_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`news_id`),
+  KEY `FKessk6m9cgxq8ux1gmxraf7pd4` (`author_id`),
+  CONSTRAINT `FKessk6m9cgxq8ux1gmxraf7pd4` FOREIGN KEY (`author_id`) REFERENCES `tblusers` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblnews`
+--
+
+LOCK TABLES `tblnews` WRITE;
+/*!40000 ALTER TABLE `tblnews` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tblnews` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tblorder`
+--
+
+DROP TABLE IF EXISTS `tblorder`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblorder` (
+  `order_id` bigint(20) NOT NULL,
+  `note` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `real_pay` double DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `time` bigint(20) DEFAULT NULL,
+  `total` double DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `delivery` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address_id` bigint(20) NOT NULL,
+  `voucher` double DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `FKbpiac7yqsspkd75my73ncsamr` (`user_id`),
+  KEY `FK867p8674mw3oia47yvtp87sh5` (`address_id`),
+  CONSTRAINT `FK867p8674mw3oia47yvtp87sh5` FOREIGN KEY (`address_id`) REFERENCES `tbl_address` (`address_id`),
+  CONSTRAINT `FKbpiac7yqsspkd75my73ncsamr` FOREIGN KEY (`user_id`) REFERENCES `tblusers` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblorder`
+--
+
+LOCK TABLES `tblorder` WRITE;
+/*!40000 ALTER TABLE `tblorder` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tblorder` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tblorder_line`
+--
+
+DROP TABLE IF EXISTS `tblorder_line`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblorder_line` (
+  `order_line_id` bigint(20) NOT NULL,
+  `amount` int(11) DEFAULT NULL,
+  `value_line` double DEFAULT NULL,
+  `order_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`order_line_id`),
+  KEY `FKnovbwj5kt9twv4i4dwa4urgwb` (`order_id`),
+  KEY `FKqmparuphwoqev9xgvpnan3le3` (`product_id`),
+  CONSTRAINT `FKnovbwj5kt9twv4i4dwa4urgwb` FOREIGN KEY (`order_id`) REFERENCES `tblorder` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FKqmparuphwoqev9xgvpnan3le3` FOREIGN KEY (`product_id`) REFERENCES `tblproducts` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblorder_line`
+--
+
+LOCK TABLES `tblorder_line` WRITE;
+/*!40000 ALTER TABLE `tblorder_line` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tblorder_line` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tblproducts`
+--
+
+DROP TABLE IF EXISTS `tblproducts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblproducts` (
+  `product_id` bigint(20) NOT NULL,
+  `active` bit(1) DEFAULT NULL,
+  `date_add` bigint(20) DEFAULT NULL,
+  `description` longtext COLLATE utf8mb4_unicode_ci,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `preview` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` double DEFAULT NULL,
+  `cate_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  KEY `FK3fcpn0dme6xxhmi34ygy0750p` (`cate_id`),
+  CONSTRAINT `FK3fcpn0dme6xxhmi34ygy0750p` FOREIGN KEY (`cate_id`) REFERENCES `tblcategories` (`cate_id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblproducts`
+--
+
+LOCK TABLES `tblproducts` WRITE;
+/*!40000 ALTER TABLE `tblproducts` DISABLE KEYS */;
+INSERT INTO `tblproducts` VALUES (115,_binary '',1609647214181,'mô tả ','http://localhost:8081Screenshot from 2020-12-28 23-31-29.png_1609647214207','test2','Loại bỏ mụn đầu đen, tế bào chết, giúp thông thoáng lỗ chân lông\nMặt nạ bong bóng thải độc da\nKiểm soát bã nhờn, thu nhỏ lỗ chân lông\nĐộ pH chuẩn, không gây khô da, phù hợp với mọi loại da\nDung tích : 120ml',200000,5),(116,_binary '',1609647782433,'mô tả ','http://localhost:8081/uploads/Screenshot from 2020-12-28 23-31-29.png_1609647782438','test2','Loại bỏ mụn đầu đen, tế bào chết, giúp thông thoáng lỗ chân lông\nMặt nạ bong bóng thải độc da\nKiểm soát bã nhờn, thu nhỏ lỗ chân lông\nĐộ pH chuẩn, không gây khô da, phù hợp với mọi loại da\nDung tích : 120ml',200000,5),(117,_binary '',1609647831531,'mô tả ','http://localhost:8081/uploads/Screenshot from 2020-12-28 23-31-29.png_1609647845680','test2','Loại bỏ mụn đầu đen, tế bào chết, giúp thông thoáng lỗ chân lông\nMặt nạ bong bóng thải độc da\nKiểm soát bã nhờn, thu nhỏ lỗ chân lông\nĐộ pH chuẩn, không gây khô da, phù hợp với mọi loại da\nDung tích : 120ml',200000,5),(118,_binary '',1609648016028,'mô tả ','http://localhost:8081/uploads/1609648018332.Screenshot from 2020-12-28 23-31-29.png','test2','Loại bỏ mụn đầu đen, tế bào chết, giúp thông thoáng lỗ chân lông\nMặt nạ bong bóng thải độc da\nKiểm soát bã nhờn, thu nhỏ lỗ chân lông\nĐộ pH chuẩn, không gây khô da, phù hợp với mọi loại da\nDung tích : 120ml',200000,5),(119,_binary '',1609649160809,'mô tả ','http://localhost:8081/uploads/1609649160809png','test2','Loại bỏ mụn đầu đen, tế bào chết, giúp thông thoáng lỗ chân lông\nMặt nạ bong bóng thải độc da\nKiểm soát bã nhờn, thu nhỏ lỗ chân lông\nĐộ pH chuẩn, không gây khô da, phù hợp với mọi loại da\nDung tích : 120ml',200000,5),(120,_binary '',1609649202175,'mô tả ','http://localhost:8081/uploads/1609649202175.png','test2','Loại bỏ mụn đầu đen, tế bào chết, giúp thông thoáng lỗ chân lông\nMặt nạ bong bóng thải độc da\nKiểm soát bã nhờn, thu nhỏ lỗ chân lông\nĐộ pH chuẩn, không gây khô da, phù hợp với mọi loại da\nDung tích : 120ml',200000,5),(121,_binary '',1609653418828,'mô tả ','/uploads/1609653418828.png','test2','Loại bỏ mụn đầu đen, tế bào chết, giúp thông thoáng lỗ chân lông\nMặt nạ bong bóng thải độc da\nKiểm soát bã nhờn, thu nhỏ lỗ chân lông\nĐộ pH chuẩn, không gây khô da, phù hợp với mọi loại da\nDung tích : 120ml',200000,5);
+/*!40000 ALTER TABLE `tblproducts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tblusers`
+--
+
+DROP TABLE IF EXISTS `tblusers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tblusers` (
+  `user_id` bigint(20) NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `full_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_active` bigint(20) NOT NULL,
+  `pass_word` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `enable` bit(1) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `UK_d2qpw421a06yryacegqhk91dx` (`user_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblusers`
+--
+
+LOCK TABLES `tblusers` WRITE;
+/*!40000 ALTER TABLE `tblusers` DISABLE KEYS */;
+INSERT INTO `tblusers` VALUES (1,'young4everbts@gmail.com','Nguyễn Thu Huyền',1609424331806,'$2a$10$ji1z69vSJIbC6slclRJ7o.VU8JRaG7FxJNmf8.0eP08okMZytBmVC','30380598402','admin','huyenngtn',NULL,_binary ''),(3,'young4everbts@gmail.com','Nguyễn Quốc Bảo',1609424455762,'$2a$10$1a1drFlHo3b0bGDQcNDb1.ebx.RyVKE.S3fNOEPoRESSoUbqGOnJm','30380598402','user','baonq',NULL,_binary '');
+/*!40000 ALTER TABLE `tblusers` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `test1`
+--
+
+DROP TABLE IF EXISTS `test1`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `test1` (
+  `user_id` bigint(20) NOT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `user_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `UK_ry7o8fwybuyfwrc535c6i15wk` (`user_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `test1`
+--
+
+LOCK TABLES `test1` WRITE;
+/*!40000 ALTER TABLE `test1` DISABLE KEYS */;
+/*!40000 ALTER TABLE `test1` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2021-01-03 16:05:09
