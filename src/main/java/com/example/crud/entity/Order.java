@@ -40,23 +40,34 @@ public class Order implements Serializable {
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
-    @Column(name = "voucher")
-    private double voucher;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_id", nullable = false)
+    private Voucher voucher;
 
     @Column(name = "delivery")
     private String delivery;
 
+    public Order(User user, String status, long time, String note, String delivery, Address address) {
+        this.user = user;
+        this.status = status;
+        this.time= time;
+        this.note= note;
+        this.delivery= delivery;
+        this.address= address;
+    }
     public Order(User user, String status, long time) {
         this.user = user;
         this.status = status;
         this.time= time;
     }
 
+
     public Order(){
 
     }
 
-    public Order(long orderId, User user, long time, double total, double realPay, String status, String note, Address address, double voucher, String delivery) {
+
+    public Order(long orderId, User user, long time, double total, double realPay, String status, String note, Address address, Voucher voucher, String delivery) {
         this.orderId = orderId;
         this.user = user;
         this.time = time;
@@ -134,11 +145,11 @@ public class Order implements Serializable {
         this.address = address;
     }
 
-    public double getVoucher() {
+    public Voucher getVoucher() {
         return voucher;
     }
 
-    public void setVoucher(double voucher) {
+    public void setVoucher(Voucher voucher) {
         this.voucher = voucher;
     }
 

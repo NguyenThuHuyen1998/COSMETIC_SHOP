@@ -22,6 +22,8 @@ public class InputParam {
     public static final String INCREASE= "increase";
     public static final String DECREASE= "decrease";
     public static final String NEWEST= "newest";
+    public static final String PRICE_INCREASE= "price_increase";
+    public static final String PRICE_DECREASE= "price_decrease";
     public static final String ROLE= "sub";
     public static final int LIMIT_DEFAULT= 10;
     public static final String PAGE= "page";

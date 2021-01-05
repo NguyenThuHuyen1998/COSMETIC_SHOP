@@ -46,12 +46,14 @@ public class OrderLine implements Serializable {
         this.order= order;
         this.product= product;
         this.amount = amount;
+        this.valueLine= amount* product.getPrice();
     }
 
     public OrderLine(Product product, Order order, int amount) {
         this.order= order;
         this.product= product;
         this.amount = amount;
+        this.valueLine= amount* product.getPrice();
     }
 
     public OrderLine(CartItem cartItem, Order order) {
@@ -96,7 +98,8 @@ public class OrderLine implements Serializable {
         return valueLine;
     }
 
-    public void setValueLine() {
-        this.valueLine = this.amount* this.getProduct().getPrice();
-    }
+//    public void setValueLine() {
+//        this.valueLine = this.amount* this.getProduct().getPrice();
+//    }
+
 }

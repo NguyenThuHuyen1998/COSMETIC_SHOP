@@ -22,6 +22,8 @@ public interface OrderService {
     List<Order> filterOrder(Map<String, Object> filter) throws ParseException;
     OrderResponse showOrder(User user);
     OrderResponse showOrder(User user, Voucher voucher);
+    double applyVoucher(Order order, Voucher voucher);
     OrderResponse createOrder(User user, String note, String delivery, Voucher voucher, Address address);
     Map<Long, Integer> getListProductBestSeller() throws ParseException;
+    OrderResponse createOrder(User user, String note, String delivery, Voucher voucher, Address address, Map<String, Integer> productList);
 }

@@ -6,6 +6,8 @@ import com.example.crud.entity.Order;
 import com.example.crud.entity.Voucher;
 import com.example.crud.helper.TimeHelper;
 import com.example.crud.output.OrderLineForm;
+import com.example.crud.service.OrderService;
+import com.example.crud.service.impl.OrderServiceImpl;
 
 import java.io.Serializable;
 import java.util.List;
@@ -61,21 +63,30 @@ public class OrderResponse implements Serializable {
         this.total= order.getTotal();
         this.address= order.getAddress();
         this.time= TimeHelper.getInstance().getDate(order.getTime());
-        this.voucher= order.getVoucher();
+        double counpon= 0;
+        Voucher voucher= order.getVoucher();
+        if (voucher!= null){
+            double value= voucher.getValueDiscount();
+            if (voucher.getTypeDiscount().equals(InputParam.PERCENT)){
+                counpon= value* order.getTotal()/100;
+            }
+            else counpon= value;
+        }
+        this.voucher= counpon;
         this.realPay= order.getRealPay();
         this.orderLineList= orderLineForms;
     }
-    public OrderResponse(long orderId, long userId, String time, String status, double total, double voucher, double realPay, Address address, List<OrderLineForm> orderLineList){
-        this.orderId= orderId;
-        this.userId= userId;
-        this.time= time;
-        this.status= status;
-        this.voucher= voucher;
-        this.total= total;
-        this.realPay= realPay;
-        this.address= address;
-        this.orderLineList= orderLineList;
-    }
+//    public OrderResponse(long orderId, long userId, String time, String status, double total, double voucher, double realPay, Address address, List<OrderLineForm> orderLineList){
+//        this.orderId= orderId;
+//        this.userId= userId;
+//        this.time= time;
+//        this.status= status;
+//        this.voucher= voucher;
+//        this.total= total;
+//        this.realPay= realPay;
+//        this.address= address;
+//        this.orderLineList= orderLineList;
+//    }
 
     public long getOrderId() {
         return orderId;

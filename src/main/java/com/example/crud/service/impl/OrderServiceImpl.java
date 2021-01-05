@@ -10,9 +10,7 @@ import com.example.crud.repository.CartRepository;
 import com.example.crud.repository.OrderLineRepository;
 import com.example.crud.repository.OrderRepository;
 import com.example.crud.response.OrderResponse;
-import com.example.crud.service.CartItemService;
-import com.example.crud.service.CartService;
-import com.example.crud.service.OrderService;
+import com.example.crud.service.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,11 +18,12 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.example.crud.service.VoucherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 /*
@@ -37,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepository;
     private CartRepository cartRepository;
     private CartItemService cartItemService;
+    private ProductService productService;
     private VoucherService voucherService;
     private OrderLineRepository orderLineRepository;
 
@@ -45,11 +45,13 @@ public class OrderServiceImpl implements OrderService {
                             CartRepository cartRepository,
                             CartItemService cartItemService,
                             VoucherService voucherService,
+                            ProductService productService,
                             OrderLineRepository orderLineRepository) {
         this.orderRepository = orderRepository;
         this.cartItemService = cartItemService;
         this.cartRepository = cartRepository;
         this.voucherService = voucherService;
+        this.productService= productService;
         this.orderLineRepository = orderLineRepository;
     }
 
@@ -130,17 +132,14 @@ public class OrderServiceImpl implements OrderService {
         String status = (String) filter.get(InputParam.STATUS);
         String dateStart = (String) filter.get(InputParam.TIME_START);
         String dateEnd = (String) filter.get(InputParam.TIME_END);
-        double priceMin = (double) filter.get(InputParam.PRICE_MIN);
-        double priceMax = (double) filter.get(InputParam.PRICE_MAX);
         String sortBy = (String) filter.get(InputParam.SORT_BY);
 
         Predicate<Order> predicate = null;
         PredicateOrderFilter predicateOrderFilter = PredicateOrderFilter.getInstance();
         Predicate<Order> checkStatus = predicateOrderFilter.checkStatus(status);
-        Predicate<Order> checkPrice = predicateOrderFilter.checkPrice(priceMin, priceMax);
         Predicate<Order> checkDate = predicateOrderFilter.checkDate(dateStart, dateEnd);
         Predicate<Order> checkUser = predicateOrderFilter.checkUser(userId);
-        predicate = checkPrice.and(checkDate).and(checkUser).and(checkStatus);
+        predicate = checkDate.and(checkUser).and(checkStatus);
         List<Order> orderList = predicateOrderFilter.filterOrder(findAllOrder(), predicate);
         orderList= sortByDateSell(orderList, sortBy);
         return orderList;
@@ -163,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
                 OrderLineForm orderLineForm = new OrderLineForm(orderLine);
                 orderLineForms.add(orderLineForm);
             }
-            order.setVoucher(0);
+            order.setVoucher(null);
         }
         OrderResponse orderResponse = new OrderResponse(order, orderLineForms);
         return orderResponse;
@@ -214,11 +213,41 @@ public class OrderServiceImpl implements OrderService {
         order.setTotal(cart.getTotalMoney());
         cart.setTotalMoney(0);
         cartRepository.save(cart);
-
+        double coupon=0;
         if (voucher != null && voucherService.validateVoucher(order, voucher)) {
-            applyVoucher(order, voucher);
+            coupon= applyVoucher(order, voucher);
         }
-        order.setRealPay(order.getTotal()- order.getVoucher());
+        order.setRealPay(order.getTotal()- coupon);
+        orderRepository.save(order);
+        OrderResponse orderResponse= new OrderResponse(order, orderLineForms);
+        return orderResponse;
+    }
+
+    @Override
+    public OrderResponse createOrder(User user, String note, String delivery, Voucher voucher, Address address, Map<String, Integer> productList){
+        Order order= new Order(user, InputParam.PROCESSING, new Date().getTime(), note, delivery, address);
+        orderRepository.save(order);
+        double totalMoney= 0;
+        List<OrderLineForm> orderLineForms= new ArrayList<>();
+        for (Map.Entry<String, Integer> entry: productList.entrySet()){
+            long productId= Long.valueOf(entry.getKey());
+            Product product= productService.findById(productId);
+            if (product== null){
+                return null;
+            }
+            if (entry.getValue()==0) continue;
+            OrderLine orderLine= new OrderLine(product, order, entry.getValue());
+            OrderLineForm orderLineForm= new OrderLineForm(orderLine);
+            orderLineForms.add(orderLineForm);
+            totalMoney= totalMoney+ product.getPrice()* entry.getValue();
+        }
+        cartItemService.deleteAllCartItem(user.getUserId());
+        order.setTotal(totalMoney);
+        double counpon= 0;
+        if (voucher != null && voucherService.validateVoucher(order, voucher)) {
+            counpon= applyVoucher(order, voucher);
+        }
+        order.setRealPay(order.getTotal()- counpon);
         orderRepository.save(order);
         OrderResponse orderResponse= new OrderResponse(order, orderLineForms);
         return orderResponse;
@@ -250,15 +279,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
-    public void applyVoucher(Order order, Voucher voucher) {
+    @Override
+    public double applyVoucher(Order order, Voucher voucher) {
+        double counpon= 0;
         double value= voucher.getValueDiscount();
         if (voucher.getTypeDiscount().equals(InputParam.PERCENT)){
-            order.setVoucher(value* order.getTotal()/100);
+            counpon= value* order.getTotal()/100;
         }
-        else order.setVoucher(value);
+        else counpon= value;
         User user= order.getUser();
         UserVoucher userVoucher= new UserVoucher(user, voucher);
         voucherService.addUserVoucher(userVoucher);
+        return counpon;
     }
 
     public List<Order> sortByDateSell(List<Order> orders, String sortBy) {

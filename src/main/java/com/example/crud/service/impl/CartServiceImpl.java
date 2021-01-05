@@ -54,4 +54,12 @@ public class CartServiceImpl implements CartService {
         return null;
     }
 
+    @Override
+    public void deleteAllCartItem(long userId) {
+        List<CartItem> cartItems= cartItemRepository.getListCartItemInCart(userId);
+        for (CartItem cartItem: cartItems){
+            cartItemRepository.delete(cartItem);
+        }
+    }
+
 }

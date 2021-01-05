@@ -28,19 +28,8 @@ public class ProductController {
     private final JwtService jwtService;
     private final OrderService orderService;
     private final FilesStorageService filesStorageService;
-//    private FileService fileService;
 
-    @Value("${file.upload-dir}")
-    private String fileDir;
 
-    @Value(("${server.port}"))
-    private int port;
-
-//    @Autowired
-//    private Drive googleDrive;
-
-    public static final String userDir= "file:///"+ System.getProperty("user.dir");
-//file:///home/huyenbaby/Downloads/CRUDProduct/uploads/Screenshot%20from%202020-12-29%2000-26-46.png
     @Autowired
     public ProductController(ProductService productService,
                              CategoryService categoryService,
@@ -54,13 +43,6 @@ public class ProductController {
         this.filesStorageService= fileStorageService;
     }
 
-    @Autowired
-    public FilesStorageService fileStorageService;
-
-    @GetMapping("/test")
-    public ResponseEntity<String> testUploadFile(@RequestParam("file") MultipartFile file){
-        return null;
-    }
     //lấy danh sách tất cả sản phẩm dành cho user
     // lọc theo category, khoảng giá, search keyword
     @CrossOrigin
@@ -70,7 +52,7 @@ public class ProductController {
                                          @RequestParam(required = false, defaultValue = "-1") double priceMin,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMax,
                                          @RequestParam(required = false, defaultValue = "0") long categoryId,
-                                         @RequestParam(required = false, defaultValue = "") String sortBy) throws ParseException {
+                                         @RequestParam(required = false, defaultValue = InputParam.NEWEST) String sortBy) throws ParseException {
             Map<String, Object> input = new HashMap<>();
             input.put(InputParam.KEY_WORD, keyword);
             input.put(InputParam.PRICE_MAX, priceMax);
@@ -105,7 +87,8 @@ public class ProductController {
             listProduct.add(mapping.getKey());
         }
         List<Product> productList= new ArrayList<>();
-        for (int i=0; i<limit; i++){
+        int target= limit< listProduct.size() ? limit: listProduct.size();
+        for (int i=0; i< target; i++){
             productList.add(productService.findById(listProduct.get(i)));
         }
         return new ResponseEntity(productList, HttpStatus.OK);
@@ -156,12 +139,7 @@ public class ProductController {
                 product.setPrice(price);
                 product.setActive(true);
                 String fileName= filesStorageService.save(file);
-                System.out.println(fileDir);
-                Path path = Paths.get(fileDir);
-                Path resolvedPath
-                        = path.resolve(fileName);
-                System.out.println(resolvedPath.toString());
-                product.setImage(resolvedPath.toString());
+                product.setImage(fileName);
                 productService.save(product);
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
@@ -205,14 +183,8 @@ public class ProductController {
                     currentProduct.setDescription(description);
                 }
                 if(file!= null){
-                    filesStorageService.save(file);
-                    String imageName= file.getOriginalFilename();
-                    Path path = Paths.get(fileDir);
-                    Path resolvedPath
-                            = path.resolve(imageName);
-                    System.out.println(resolvedPath.toString());
-                    currentProduct.setImage("http://localhost:"+ String.valueOf(port)+resolvedPath);
-                    currentProduct.setImage(fileDir+ file.getOriginalFilename());
+                    String fileName= filesStorageService.save(file);
+                    currentProduct.setImage(fileName);
                 }
                 productService.save(currentProduct);
                 return new ResponseEntity<>(currentProduct, HttpStatus.OK);

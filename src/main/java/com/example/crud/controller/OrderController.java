@@ -2,11 +2,10 @@ package com.example.crud.controller;
 
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.*;
-import com.example.crud.helper.TimeHelper;
 import com.example.crud.response.OrderResponse;
 import com.example.crud.output.OrderLineForm;
 import com.example.crud.service.*;
-import org.apache.commons.lang3.time.DateUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,7 @@ public class OrderController {
     private SendEmailService emailService;
     private JwtService jwtService;
     private VoucherService voucherService;
+    private ProductService productService;
     private ShipService shipService;
 
     @Autowired
@@ -44,6 +44,7 @@ public class OrderController {
                            OrderLineService orderLineService,
                            JwtService jwtService,
                            ShipService shipService,
+                           ProductService productService,
                            VoucherService voucherService) {
         this.orderService = orderService;
         this.cartService = cartService;
@@ -52,43 +53,92 @@ public class OrderController {
         this.emailService= service;
         this.jwtService = jwtService;
         this.shipService= shipService;
+        this.productService= productService;
         this.voucherService= voucherService;
     }
 
     //tạo đơn hàng mới từ giỏ hàng, điền các thông tin trong form ship, nhap ma giam gia
-    @PostMapping(value = "/userPage/orders")
-    public ResponseEntity<Order> createOrder(@RequestBody String data,
-                                             HttpServletRequest request) throws ParseException {
-        if(jwtService.isCustomer(request)){
+//    @PostMapping(value = "/userPage/orders")
+//    public ResponseEntity<Order> createOrder(@RequestBody String data,
+//                                             HttpServletRequest request) throws ParseException {
+//        if(jwtService.isCustomer(request)){
+//            User user= jwtService.getCurrentUser(request);
+//            JSONObject jsonObject= new JSONObject(data);
+//            long addressId= jsonObject.getLong("addressId");
+//            Address address= shipService.getAddress(addressId);
+//            if (address== null){
+//                return new ResponseEntity("Địa chỉ không tổn tại!", HttpStatus.BAD_REQUEST);
+//            }
+//            address.setAddressId(addressId);
+//            String note= jsonObject.getString("note");
+//            String delivery= jsonObject.getString("delivery");
+//            address.setUser(user);
+//            String code= jsonObject.getString("code");
+//            Voucher voucher= null;
+//            if(code!= null && code!=""){
+//                voucher= voucherService.getVoucherByCode(code);
+//                if (voucher== null){
+//                    return new ResponseEntity("This coupon is not exist!", HttpStatus.BAD_REQUEST);
+//                }
+//                String expiryDate= voucher.getDateEnd();
+//                long expiry= TimeHelper.getInstance().convertTimestamp(expiryDate + " 23:59:59");
+//                if (expiry< new Date().getTime()){
+//                    return new ResponseEntity("Coupon code has expired!", HttpStatus.BAD_REQUEST);
+//                }
+//            }
+//            OrderResponse orderResponse= orderService.createOrder(user, note, delivery, voucher, address);
+//            return new ResponseEntity(orderResponse, HttpStatus.OK);
+//        }
+//        return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
+//    }
+
+    @PostMapping(value = "userPage/orders")
+    public ResponseEntity<Order> createOrder(@RequestBody String body,
+                                             HttpServletRequest request){
+        if (jwtService.isCustomer(request)){
             User user= jwtService.getCurrentUser(request);
-            JSONObject jsonObject= new JSONObject(data);
+            JSONObject jsonObject= new JSONObject(body);
             long addressId= jsonObject.getLong("addressId");
             Address address= shipService.getAddress(addressId);
             if (address== null){
-                return new ResponseEntity("Địa chỉ không tổn tại!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity("Địa chỉ không tồn tại!", HttpStatus.OK);
             }
-            address.setAddressId(addressId);
             String note= jsonObject.getString("note");
             String delivery= jsonObject.getString("delivery");
-            address.setUser(user);
+            if (delivery== null || delivery.equals("")){
+                return new ResponseEntity("Hãy chọn hình thức vận chuyển", HttpStatus.OK);
+            }
             String code= jsonObject.getString("code");
             Voucher voucher= null;
-            if(code!= null && code!=""){
+            if (!code.equals("")){
                 voucher= voucherService.getVoucherByCode(code);
                 if (voucher== null){
-                    return new ResponseEntity("This coupon is not exist!", HttpStatus.BAD_REQUEST);
-                }
-                String expiryDate= voucher.getDateEnd();
-                long expiry= TimeHelper.getInstance().convertTimestamp(expiryDate + " 23:59:59");
-                if (expiry< new Date().getTime()){
-                    return new ResponseEntity("Coupon code has expired!", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity("Mã giảm giá không hợp lệ!", HttpStatus.BAD_REQUEST);
                 }
             }
-            OrderResponse orderResponse= orderService.createOrder(user, note, delivery, voucher, address);
+            JSONObject jsonProduct= jsonObject.getJSONObject("productList");
+            Map<String, Integer> hashMap= toMap(jsonProduct);
+
+//            HashMap<String, Integer> hashMap = new Gson().fromJson(jsonProduct.toString(), HashMap.class);
+            OrderResponse orderResponse= orderService.createOrder(user, note, delivery, voucher, address, hashMap);
             return new ResponseEntity(orderResponse, HttpStatus.OK);
         }
         return new ResponseEntity("Đăng nhập trước khi thực hiện", HttpStatus.METHOD_NOT_ALLOWED);
     }
+
+    public static Map<String, Integer> toMap(JSONObject object) throws JSONException {
+        Map<String, Integer> map = new HashMap<String, Integer>();
+
+        Iterator<String> keysItr = object.keys();
+        while(keysItr.hasNext()) {
+            String key = keysItr.next();
+            int value = (int) object.get(key);
+            map.put(key, value);
+        }
+        return map;
+    }
+
+
 
     @GetMapping(value = "/userPage/order")
     public ResponseEntity<OrderResponse> showOrder(HttpServletRequest request){
@@ -134,12 +184,9 @@ public class OrderController {
     public ResponseEntity<OrderResponse> getlistOrder(@RequestParam(name = "status", required = false, defaultValue = "") String status,
                                                       @RequestParam(name = "dateStart", required = false, defaultValue = "-1") String dateStart,
                                                       @RequestParam(name = "dateEnd", required = false, defaultValue = "-1") String dateEnd,
-                                                      @RequestParam(name = "priceMin", required = false, defaultValue = "-1") double priceMin,
-                                                      @RequestParam(name = "priceMax", required = false, defaultValue = "-1") double priceMax,
                                                       @RequestParam(name = "sortBy", required = false, defaultValue = InputParam.DECREASE) String sortBy,
                                                       HttpServletRequest request) throws ParseException {
         if(jwtService.isCustomer(request)){
-
             long userId= jwtService.getCurrentUser(request).getUserId();
             Map<String, Object> filter= new HashMap<>();
             filter.put(InputParam.USER_ID, userId);
@@ -147,8 +194,6 @@ public class OrderController {
             filter.put(InputParam.TIME_START, dateStart);
             filter.put(InputParam.TIME_END, dateEnd);
             filter.put(InputParam.SORT_BY, sortBy);
-            filter.put(InputParam.PRICE_MIN, priceMin);
-            filter.put(InputParam.PRICE_MAX, priceMax);
 
             List<Order> orderFilter = orderService.filterOrder(filter);
             List<Order> orderTotal= orderService.getListOrderByUserId(userId);

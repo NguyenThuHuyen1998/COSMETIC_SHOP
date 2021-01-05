@@ -55,7 +55,6 @@ public class CartItemController {
                     cartItemService.save(cartItemTarget);
                 } else if(cartItemTarget== null){
                     cartItemTarget= new CartItem(cart, product, 1);
-                    cartItemList.add(cartItemTarget);
                     cartItemService.save(cartItemTarget);
                 }
                 cart.setTotalMoney(cart.getTotalMoney()+ cartItemTarget.getProduct().getPrice());

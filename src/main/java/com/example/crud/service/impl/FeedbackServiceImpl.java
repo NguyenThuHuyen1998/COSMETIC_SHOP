@@ -8,6 +8,7 @@ import com.example.crud.service.FeedbackService;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -53,8 +54,18 @@ public class FeedbackServiceImpl implements FeedbackService {
         Collections.sort(feedBacks, new Comparator<FeedBack>() {
             @SneakyThrows
             public int compare(FeedBack o1, FeedBack o2) {
-                long time1= TimeHelper.getInstance().convertTimestamp(o1.getDatePost());
-                long time2= TimeHelper.getInstance().convertTimestamp(o2.getDatePost());
+                long time1= 0;
+                try {
+                    time1 = TimeHelper.getInstance().convertTimestamp(o1.getDatePost());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                long time2= 0;
+                try {
+                    time2 = TimeHelper.getInstance().convertTimestamp(o2.getDatePost());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 return time1 < time2 ? 1 : (o1 == o2 ? 0 : -1);
             }
         });

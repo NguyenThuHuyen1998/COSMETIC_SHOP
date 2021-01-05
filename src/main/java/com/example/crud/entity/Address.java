@@ -17,16 +17,12 @@ public class Address implements Serializable {
     private long addressId;
 
     @NotEmpty(message = "*Please provider your city")
-    @Column(name = "city")
-    private String city;
+    @Column(name = "full_name")
+    private String fullName;
 
-    @NotEmpty(message = "*Please provider your district")
-    @Column(name = "district")
-    private String district;
-
-    @NotEmpty(message = "*Please provider your street")
-    @Column(name = "street")
-    private String street;
+    @Column(name = "detail_address")
+    @NotEmpty(message = "*Please provider your address")
+    private String detailAddress;
 
     @NotEmpty(message = "*Please provider your phone")
     @Column(name = "phone")
@@ -36,19 +32,12 @@ public class Address implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Address(@NotEmpty(message = "*Please provider your city") String city, @NotEmpty(message = "*Please provider your district") String district, @NotEmpty(message = "*Please provider your street") String street, @NotEmpty(message = "*Please provider your phone") String phone) {
-        this.city = city;
-        this.district = district;
-        this.street = street;
+    public Address(long addressId, @NotEmpty(message = "*Please provider your city") String fullName, @NotEmpty(message = "*Please provider your address") String detailAddress, @NotEmpty(message = "*Please provider your phone") String phone, User user) {
+        this.addressId = addressId;
+        this.fullName = fullName;
+        this.detailAddress = detailAddress;
         this.phone = phone;
-    }
-
-    public Address(String data){
-        JSONObject jsonObject= new JSONObject(data);
-        this.city= jsonObject.getString("city");
-        this.district= jsonObject.getString("district");
-        this.street= jsonObject.getString("street");
-        this.phone= jsonObject.getString("phone");
+        this.user = user;
     }
 
     public Address() {
@@ -65,28 +54,20 @@ public class Address implements Serializable {
         this.addressId = addressId;
     }
 
-    public String getCity() {
-        return city;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getDistrict() {
-        return district;
+    public String getDetailAddress() {
+        return detailAddress;
     }
 
-    public void setDistrict(String district) {
-        this.district = district;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
+    public void setDetailAddress(String detailAddress) {
+        this.detailAddress = detailAddress;
     }
 
     public String getPhone() {

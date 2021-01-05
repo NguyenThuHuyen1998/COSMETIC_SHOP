@@ -74,14 +74,14 @@ public class JwtAuthenticationController {
     public ResponseEntity<User> saveUser(@RequestBody User user) throws Exception {
         User currentUser = userService.findByName(user.getUserName());
         if (currentUser != null) {
-            return new ResponseEntity("Username không tồn tại", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity("Username đã tồn tại", HttpStatus.BAD_REQUEST);
         }
         String email = user.getEmail();
         if (!EmailValidator.getInstance().isValid(email)) {
             return new ResponseEntity("Email không hợp lệ!", HttpStatus.BAD_REQUEST);
         }
         user.setRole(InputParam.USER);
-        user.setAvatar(fileDir+ "avatardefault.png");
+        user.setAvatar("avatardefault.png");
         user.setEnable(true);
         //set lần cuối hoạt động để check sau 3 tháng k hoạt động thì xóa sản phẩm trong giỏ hàng
         user.setLastActive(new Date().getTime());
